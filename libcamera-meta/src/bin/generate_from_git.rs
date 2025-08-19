@@ -80,7 +80,13 @@ fn main() {
 
         println!("Extracting files for version {version}");
 
-        let object = repo.find_object(id, Some(ObjectType::Tag)).unwrap();
+        let object = if let Ok(object) = repo.find_object(id, Some(ObjectType::Tag)) {
+            object
+        } else if let Ok(object) = repo.find_object(id, Some(ObjectType::Commit)) {
+            object
+        } else {
+            panic!("Failed to find object for tag {name} with id {id}");
+        };
 
         repo.checkout_tree(&object, Some(CheckoutBuilder::new().force()))
             .unwrap();
